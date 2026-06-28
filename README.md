@@ -82,6 +82,34 @@ Two Claude Code hooks, both feeding the model through `additionalContext`:
 
 Plain files, no database. Anchor matching is glob-based (`micromatch`).
 
+## Does it actually work?
+
+lore is a rare-but-high-value tool: most edits it does nothing; occasionally it
+prevents a real mistake. So "did it feel useful today" is the wrong test. Real
+value is three factors multiplied, and any weak one kills it:
+
+```
+value = P(a relevant note exists) × P(it fires when relevant) × P(injection flips the outcome)
+            coverage / capture          retrieval                  injection lift
+```
+
+Two commands measure the automatable factors:
+
+- `lore log` — **retrieval/coverage.** How often a note actually fired, on which
+  files. A fire is necessary, not sufficient: it's the denominator and the list
+  of fires to hand-label as save vs noise. Written to `.lore/recall-log.jsonl`
+  (kept local, gitignored).
+- `lore eval [--runs=N]` — **injection lift.** Runs each held-out case twice
+  (no note vs note injected) and reports the lift. It hands the note to the
+  model directly, so it *assumes perfect retrieval* — read the number as an
+  upper bound. Bring your own OpenAI-compatible endpoint via env
+  (`LORE_LLM_BASE_URL` / `LORE_LLM_MODEL` / `LORE_LLM_API_KEY`); a local model
+  works. Near-zero lift on cases a model already knows is expected and honest —
+  lift should concentrate on non-derivable facts.
+
+The third factor (does a relevant note even exist) is the capture gap: track it
+by tallying *misses* — times the agent erred where a note should have existed.
+
 ## License
 
 Apache-2.0.

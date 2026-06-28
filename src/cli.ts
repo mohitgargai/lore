@@ -5,11 +5,15 @@
  *   lore index                print the knowledge index (Orient injects this)
  *   lore recall <file>        print full notes anchored to <file>
  *   lore list                 list note ids + anchors
+ *   lore log                  summarize recall events (coverage/retrieval)
+ *   lore eval [--runs=N]      held-out control-vs-treatment injection-lift eval
  *   lore hook session-start   (Orient) emit the index as JSON
  *   lore hook pre-tool-use    (Guard) emit notes for the file being edited
  */
+import { runEval } from "./eval";
 import { preToolUseOutput, readHookInput, sessionStartOutput } from "./hooks";
 import { runInit } from "./init";
+import { logEvent, readLog, summarizeLog } from "./log";
 import { loadNotes, notesForFile, renderGuard, renderIndex } from "./store";
 
 async function main(): Promise<void> {
@@ -40,20 +44,39 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "log": {
+      process.stdout.write(summarizeLog(readLog()) + "\n");
+      return;
+    }
+
+    case "eval": {
+      try {
+        await runEval(rest);
+      } catch (e) {
+        fail(e instanceof Error ? e.message : String(e));
+      }
+      return;
+    }
+
     case "hook": {
       const sub = rest[0];
       const input = await readHookInput();
 
       if (sub === "session-start") {
-        process.stdout.write(sessionStartOutput(renderIndex(loadNotes())));
+        const notes = loadNotes();
+        logEvent({ trigger: "orient", notes: notes.map((n) => n.id) });
+        process.stdout.write(sessionStartOutput(renderIndex(notes)));
         return;
       }
 
       if (sub === "pre-tool-use") {
         const file = input.tool_input?.file_path;
         if (typeof file === "string") {
-          const ctx = renderGuard(notesForFile(loadNotes(), file), file);
-          if (ctx) process.stdout.write(preToolUseOutput(ctx));
+          const notes = notesForFile(loadNotes(), file);
+          if (notes.length) {
+            logEvent({ trigger: "guard", file, notes: notes.map((n) => n.id) });
+            process.stdout.write(preToolUseOutput(renderGuard(notes, file)));
+          }
         }
         return;
       }
@@ -62,7 +85,7 @@ async function main(): Promise<void> {
     }
 
     default:
-      fail("commands: init | index | recall <file> | list | hook session-start");
+      fail("commands: init | index | recall <file> | list | log | eval | hook <session-start|pre-tool-use>");
   }
 }
 
