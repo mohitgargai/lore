@@ -1,0 +1,31 @@
+{
+  "name": "lore",
+  "version": "0.0.1",
+  "description": "In-repo, agent-native tacit knowledge for coding agents — the Orient slice.",
+  "type": "module",
+  "bin": {
+    "lore": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "micromatch": "^4.0.8"
+  },
+  "devDependencies": {
+    "@types/micromatch": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "license": "Apache-2.0"
+}
