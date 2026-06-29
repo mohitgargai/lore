@@ -144,7 +144,7 @@ export async function runCapture(
 /** The skeptical second pass that replaces human approval. */
 async function verify(c: Candidate, diff: string): Promise<Verdict> {
   const prompt =
-    `Act as a skeptical senior engineer reviewing a proposed repo-knowledge note.\n` +
+    `Act as a skeptical senior engineer reviewing a candidate repo-knowledge note.\n` +
     `Keep it ONLY if it is a real, durable, NON-derivable fact about THIS codebase — not generic ` +
     `best-practice, not transient, not already obvious from the code — and consistent with the change below.\n\n` +
     `NOTE: ${c.body}\n\nCHANGE:\n${truncate(diff, 6000)}\n\n` +

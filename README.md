@@ -41,7 +41,7 @@ In a repo you work on with Claude Code:
 ```bash
 lore setup     # guided: configure the LLM key (for capture/check), then init this repo
 # or, no prompts / no key:
-lore init      # just creates .lore/ and adds the two hooks
+lore init      # just creates .lore/ and wires the hooks
 lore index     # print what the agent gets at session start
 ```
 
@@ -82,15 +82,18 @@ wrong thing (tried that, reverted it).
 
 ## How it works
 
-Two Claude Code hooks, both feeding the model through `additionalContext`:
+Three Claude Code hooks, wired by `lore init`:
 
-- `SessionStart` runs `lore hook session-start` and returns the index (titles +
-  anchors only, so it's cheap to keep in context).
-- `PreToolUse` on `Edit|Write` runs `lore hook pre-tool-use`, reads the file path
-  from the tool input, and returns the full body of any note anchored to it. It
-  adds context; it doesn't block the edit.
+- **Orient** — `SessionStart` returns the index (titles + anchors only, so it's
+  cheap to keep in context) via `additionalContext`.
+- **Guard** — `PreToolUse` on `Edit|Write` reads the target file and returns the
+  full body of any note anchored to it, via `additionalContext`. It adds context;
+  it doesn't block the edit.
+- **Capture** — `Stop` auto-captures new notes at session end (covered below).
+  Needs an LLM; no-ops without one.
 
-Plain files, no database. Anchor matching is glob-based (`micromatch`).
+Orient and Guard are the keyless core — pure file matching, no API key. Plain
+files, no database. Anchor matching is glob-based (`micromatch`).
 
 ## Capture and check (optional, bring your own LLM)
 
@@ -107,8 +110,8 @@ export LORE_LLM_API_KEY=...                          # or OPENAI_API_KEY; omit f
 - **Auto-capture** runs on the `Stop` hook (wired by `lore init`): at session end
   it mines the transcript + diff for durable, non-derivable notes — biased to
   where you corrected the agent — verifies each one against the code, and writes
-  survivors straight to `.lore/notes/` with `source: auto`. No `proposed/`, no
-  accept step. It no-ops silently until an LLM is configured.
+  the survivors to `.lore/notes/` (`source: auto`). The verify step is the only
+  gate; there's no manual review. It no-ops silently until an LLM is configured.
 - `lore capture [range]` runs the same pipeline on demand — handy for
   backfilling notes from a stretch of history (e.g. `lore capture main`).
 - `lore check [base]` — finds notes anchored to changed files and asks the model

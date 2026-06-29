@@ -1,6 +1,6 @@
 /**
- * `lore init` — scaffold the store in the current repo and wire the
- * SessionStart hook into .claude/settings.json.
+ * `lore init` — scaffold the store in the current repo and wire lore's hooks
+ * (Orient, Guard, Capture) into .claude/settings.json.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -54,14 +54,19 @@ tier: structural | rationale     # structural = checkable; rationale = the "why"
 anchors: ["src/area/**", "symbol:functionName"]
 confidence: high | medium | low
 created: YYYY-MM-DD
-source: correction | seed | session
+source: auto | seed | hand
 ---
 One idea, stated plainly. Anchor it to every file it touches.
 \`\`\`
 
 ## How it reaches the agent
-A \`SessionStart\` hook injects an index of these notes at the start of every
-Claude Code session (the "Orient" trigger). Run \`lore index\` to see it.
+Three Claude Code hooks, wired by \`lore init\`:
+- **Orient** — at session start, the index of these notes is injected.
+- **Guard** — right before an edit, the full note for that file is injected.
+- **Capture** — at session end, new notes are auto-captured (needs an LLM).
+
+Run \`lore index\` to see what the agent gets. Notes appear here either by
+auto-capture or by you adding a markdown file.
 `;
 
 export function runInit(cwd: string): void {
@@ -90,7 +95,7 @@ export function runInit(cwd: string): void {
   console.log("run 'lore setup' to enable auto-capture; see the index with 'lore index'.");
 }
 
-/** Idempotently add both hooks to .claude/settings.json. */
+/** Idempotently add lore's hooks to .claude/settings.json. */
 function wireHooks(cwd: string): void {
   const dir = join(cwd, ".claude");
   mkdirSync(dir, { recursive: true });
@@ -102,9 +107,10 @@ function wireHooks(cwd: string): void {
       settings = JSON.parse(readFileSync(file, "utf8"));
     } catch {
       console.warn("! .claude/settings.json wasn't valid JSON — leaving it untouched.");
-      console.warn(`! Add these manually:`);
-      console.warn(`!   SessionStart           -> "${ORIENT_COMMAND}"`);
+      console.warn("! Add these hooks manually:");
+      console.warn(`!   SessionStart            -> "${ORIENT_COMMAND}"`);
       console.warn(`!   PreToolUse "Edit|Write" -> "${GUARD_COMMAND}"`);
+      console.warn(`!   Stop                    -> "${CAPTURE_COMMAND}"`);
       return;
     }
   }
