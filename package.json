@@ -1,7 +1,27 @@
 {
   "name": "lore",
   "version": "0.0.1",
-  "description": "In-repo, agent-native tacit knowledge for coding agents — the Orient slice.",
+  "description": "In-repo, agent-native tacit knowledge for coding agents: facts the code can't show, surfaced to Claude Code at session start and right before edits.",
+  "keywords": [
+    "claude-code",
+    "coding-agent",
+    "ai",
+    "context",
+    "documentation",
+    "adr",
+    "knowledge",
+    "hooks"
+  ],
+  "homepage": "https://github.com/mohitgargai/lore#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohitgargai/lore.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mohitgargai/lore/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Mohit Garg",
   "type": "module",
   "bin": {
     "lore": "dist/cli.js"
@@ -10,11 +30,16 @@
     "dist",
     "eval"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepare": "tsup",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
@@ -27,6 +52,5 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
-  },
-  "license": "Apache-2.0"
+  }
 }

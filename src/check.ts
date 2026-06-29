@@ -4,7 +4,7 @@
  * false. Prints a verdict per note; exits non-zero if any look stale, so it can
  * gate a PR. This is the one thing a flat doc / CLAUDE.md can't do for you.
  */
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { completeJSON } from "./llm";
 import { loadNotes, matchedFiles, type Note } from "./store";
 
@@ -13,9 +13,9 @@ interface Verdict {
   reason: string;
 }
 
-function git(cmd: string): string {
+function git(args: string[]): string {
   try {
-    return execSync(cmd, { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+    return execFileSync("git", args, { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
   } catch {
     return "";
   }
@@ -25,8 +25,9 @@ const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n) + "\nâ€
 
 export async function runCheck(args: string[], cwd: string = process.cwd()): Promise<void> {
   const base = args.find((a) => !a.startsWith("--"));
-  const nameOnly = base ? `git diff --name-only ${base}` : "git diff --name-only HEAD";
-  const changed = git(nameOnly).split("\n").filter(Boolean);
+  const changed = git(base ? ["diff", "--name-only", base] : ["diff", "--name-only", "HEAD"])
+    .split("\n")
+    .filter(Boolean);
 
   if (changed.length === 0) {
     console.log("No changed files to check.");
@@ -59,7 +60,7 @@ export async function runCheck(args: string[], cwd: string = process.cwd()): Pro
 async function judge(note: Note, changed: string[], base?: string): Promise<Verdict> {
   const files = [...new Set(matchedFiles(note, changed))];
   const range = base ?? "HEAD";
-  const diff = git(`git diff ${range} -- ${files.map((f) => `'${f}'`).join(" ")}`);
+  const diff = git(["diff", range, "--", ...files]);
   const prompt =
     `A repo-knowledge note and a code change. Decide whether the change makes the note's claim FALSE.\n\n` +
     `NOTE:\n${note.body}\n\nDIFF:\n${truncate(diff, 8000)}\n\n` +

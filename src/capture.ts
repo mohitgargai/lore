@@ -4,7 +4,7 @@
  * writes drafts to .lore/proposed/ for human review. Never writes to notes/
  * directly — you review, then `lore accept`.
  */
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { completeJSON } from "./llm";
@@ -27,9 +27,9 @@ Write each note as a FACT or rationale — never as an instruction to the agent.
 Anchor each note to the file globs it concerns, drawn from the changed files.
 Return [] if nothing qualifies. Prefer [] over weak notes — silence is correct when there's no durable lesson.`;
 
-function git(cmd: string): string {
+function git(args: string[]): string {
   try {
-    return execSync(cmd, { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+    return execFileSync("git", args, { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
   } catch {
     return "";
   }
@@ -44,9 +44,10 @@ export async function runCapture(
 ): Promise<void> {
   const say = opts.quiet ? () => {} : (m: string) => console.log(m);
   const range = args.find((a) => !a.startsWith("--"));
-  const diffCmd = range ? `git diff ${range}` : "git diff HEAD";
-  const diff = git(diffCmd);
-  const files = git(range ? `git diff --name-only ${range}` : "git diff --name-only HEAD").split("\n").filter(Boolean);
+  const diff = git(range ? ["diff", range] : ["diff", "HEAD"]);
+  const files = git(range ? ["diff", "--name-only", range] : ["diff", "--name-only", "HEAD"])
+    .split("\n")
+    .filter(Boolean);
 
   if (!diff.trim()) {
     say("No changes to capture (git diff is empty).");

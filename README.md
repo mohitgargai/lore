@@ -118,7 +118,9 @@ Stop hook if you want it:
 Staleness in CI — run `lore check` against the PR base:
 
 ```yaml
-- run: npx lore check origin/${{ github.base_ref }}
+# not on npm yet; install (and build) straight from the repo:
+- run: npm i -g github:mohitgargai/lore
+- run: lore check origin/${{ github.base_ref }}
   env: { LORE_LLM_BASE_URL: ..., LORE_LLM_MODEL: ..., LORE_LLM_API_KEY: ${{ secrets.LLM_KEY }} }
 ```
 
