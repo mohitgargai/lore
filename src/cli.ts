@@ -1,7 +1,8 @@
 /**
  * lore — in-repo, agent-native tacit knowledge. (Orient slice.)
  *
- *   lore init                 scaffold .lore/ + wire the hooks
+ *   lore setup                guided activation: configure LLM/key, then init the repo
+ *   lore init                 scaffold .lore/ + wire the hooks (no prompts)
  *   lore index                print the knowledge index (Orient injects this)
  *   lore recall <file>        print full notes anchored to <file>
  *   lore list                 list note ids + anchors
@@ -21,12 +22,17 @@ import { preToolUseOutput, readHookInput, sessionStartOutput } from "./hooks";
 import { runInit } from "./init";
 import { llmConfigured } from "./llm";
 import { logEvent, readLog, summarizeLog } from "./log";
+import { runSetup } from "./setup";
 import { loadNotes, notesForFile, renderGuard, renderIndex } from "./store";
 
 async function main(): Promise<void> {
   const [cmd, ...rest] = process.argv.slice(2);
 
   switch (cmd) {
+    case "setup":
+      await runSetup(process.cwd());
+      return;
+
     case "init":
       runInit(process.cwd());
       return;
@@ -128,7 +134,7 @@ async function main(): Promise<void> {
 
     default:
       fail(
-        "commands: init | index | recall <file> | list | capture [range] | accept [id] | " +
+        "commands: setup | init | index | recall <file> | list | capture [range] | accept [id] | " +
           "check [base] | log | eval | hook <session-start|pre-tool-use|stop>",
       );
   }

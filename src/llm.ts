@@ -4,24 +4,24 @@
  * model (Ollama / LM Studio / vLLM). The core tool (orient/guard) needs none of
  * this; only the LLM-backed commands do.
  */
+import { loadConfig } from "./config";
+
 const SETUP_HINT =
-  "Set an OpenAI-compatible endpoint (bring your own provider/key):\n" +
-  "  LORE_LLM_BASE_URL  e.g. https://api.openai.com/v1 | http://localhost:11434/v1 (Ollama)\n" +
-  "  LORE_LLM_MODEL     e.g. gpt-4o-mini | a local model\n" +
-  "  LORE_LLM_API_KEY   or OPENAI_API_KEY; omit for local";
+  "No LLM endpoint configured. Run:  lore setup\n" +
+  "or set env vars: LORE_LLM_BASE_URL, LORE_LLM_MODEL, LORE_LLM_API_KEY\n" +
+  "(any OpenAI-compatible endpoint — OpenAI, OpenRouter, or a local Ollama model).";
 
 export function llmConfigured(): boolean {
-  return !!(process.env.LORE_LLM_BASE_URL && process.env.LORE_LLM_MODEL);
+  const c = loadConfig();
+  return !!(c.baseUrl && c.model);
 }
 
 export async function complete(prompt: string): Promise<string> {
-  const base = process.env.LORE_LLM_BASE_URL;
-  const model = process.env.LORE_LLM_MODEL;
-  const key = process.env.LORE_LLM_API_KEY ?? process.env.OPENAI_API_KEY ?? "";
-  if (!base || !model) throw new Error(SETUP_HINT);
-  const res = await fetch(`${base.replace(/\/+$/, "")}/chat/completions`, {
+  const { baseUrl, model, apiKey } = loadConfig();
+  if (!baseUrl || !model) throw new Error(SETUP_HINT);
+  const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/chat/completions`, {
     method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+    headers: { "content-type": "application/json", authorization: `Bearer ${apiKey ?? ""}` },
     body: JSON.stringify({ model, temperature: 0, messages: [{ role: "user", content: prompt }] }),
   });
   if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);

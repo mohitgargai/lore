@@ -35,9 +35,15 @@ npm link
 In a repo you work on with Claude Code:
 
 ```bash
-lore init      # creates .lore/ and adds the two hooks
+lore setup     # guided: configure the LLM key (for capture/check), then init this repo
+# or, no prompts / no key:
+lore init      # just creates .lore/ and adds the two hooks
 lore index     # print what the agent gets at session start
 ```
+
+`lore setup` is the friendly start — it walks you through the LLM endpoint/key
+(only needed for capture & check) and offers to init the repo. `lore init` is the
+scriptable, keyless version.
 
 Restart Claude Code in that repo. The index loads at session start, and notes
 get injected before edits, on their own. Write notes by dropping markdown files
@@ -84,8 +90,9 @@ Plain files, no database. Anchor matching is glob-based (`micromatch`).
 
 ## Capture and check (optional, bring your own LLM)
 
-The core above needs no API key. These two do — point them at any
-OpenAI-compatible endpoint, including a local model:
+The core above needs no API key. These two do. Easiest is `lore setup`, which
+configures and persists it (to `~/.config/lore/config.json`, readable only by
+you). Or set env vars (which always override the saved config — handy for CI):
 
 ```bash
 export LORE_LLM_BASE_URL=https://api.openai.com/v1   # or http://localhost:11434/v1 (Ollama)
