@@ -8,6 +8,7 @@ import { LORE_GITIGNORE } from "./store";
 
 const ORIENT_COMMAND = "lore hook session-start";
 const GUARD_COMMAND = "lore hook pre-tool-use";
+const CAPTURE_COMMAND = "lore hook stop";
 
 const SAMPLE_NOTE = (today: string) => `---
 id: example-delete-me
@@ -81,11 +82,12 @@ export function runInit(cwd: string): void {
   wireHooks(cwd);
 
   console.log("created .lore/ with an example note (replace it with a real one)");
-  console.log("wired two hooks into .claude/settings.json:");
+  console.log("wired three hooks into .claude/settings.json:");
   console.log("  SessionStart            -> injects the knowledge index (Orient)");
   console.log("  PreToolUse(Edit|Write)  -> injects the note for a file before you edit it (Guard)");
+  console.log("  Stop                    -> auto-captures notes from the session (Capture; needs an LLM)");
   console.log("\nrestart Claude Code in this repo for the hooks to take effect.");
-  console.log("see the index with: lore index");
+  console.log("run 'lore setup' to enable auto-capture; see the index with 'lore index'.");
 }
 
 /** Idempotently add both hooks to .claude/settings.json. */
@@ -113,6 +115,7 @@ function wireHooks(cwd: string): void {
     matcher: "Edit|Write",
     hooks: [{ type: "command", command: GUARD_COMMAND }],
   });
+  addHook(settings.hooks, "Stop", { hooks: [{ type: "command", command: CAPTURE_COMMAND }] });
 
   writeFileSync(file, `${JSON.stringify(settings, null, 2)}\n`);
 }

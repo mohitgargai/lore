@@ -15,10 +15,14 @@ short index of what's written down (Orient), and right before an edit it injects
 the full note for that file (Guard) — the last moment to prevent a wrong change.
 Neither relies on the agent choosing to look something up.
 
-Two optional commands keep the corpus alive and honest (these call an LLM — bring
-your own key): `lore capture` proposes notes from a diff so writing them isn't
-manual willpower, and `lore check` flags a note when the code under it changed,
-so the knowledge doesn't quietly rot.
+Two more things keep the corpus alive and honest (these call an LLM — bring your
+own key, local models work). At the end of each session lore **auto-captures**
+notes from what just happened — biased to the moments where you corrected the
+agent — and every candidate must pass a skeptical verify step before it's
+written. There's no manual review: the verify *is* the approval, because a corpus
+that needs someone to run a command and click accept stays empty. And `lore
+check` flags a note when the code under it changed, so knowledge doesn't quietly
+rot.
 
 ## Install
 
@@ -100,20 +104,16 @@ export LORE_LLM_MODEL=gpt-4o-mini                    # or a local model
 export LORE_LLM_API_KEY=...                          # or OPENAI_API_KEY; omit for local
 ```
 
-- `lore capture [range]` — reads a git diff (default uncommitted), proposes only
-  durable, non-derivable notes (the gate) into `.lore/proposed/`. Review them,
-  then `lore accept [id]` moves drafts into `notes/`. Nothing is written to your
-  knowledge without you accepting it.
+- **Auto-capture** runs on the `Stop` hook (wired by `lore init`): at session end
+  it mines the transcript + diff for durable, non-derivable notes — biased to
+  where you corrected the agent — verifies each one against the code, and writes
+  survivors straight to `.lore/notes/` with `source: auto`. No `proposed/`, no
+  accept step. It no-ops silently until an LLM is configured.
+- `lore capture [range]` runs the same pipeline on demand — handy for
+  backfilling notes from a stretch of history (e.g. `lore capture main`).
 - `lore check [base]` — finds notes anchored to changed files and asks the model
   whether the change makes each claim false. Prints a verdict per note and exits
   non-zero if any look stale, so it can gate a PR.
-
-Auto-capture at session end is opt-in (it costs an LLM call per session). Add a
-Stop hook if you want it:
-
-```json
-{ "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "lore hook stop" } ] } ] } }
-```
 
 Staleness in CI — run `lore check` against the PR base:
 

@@ -6,16 +6,15 @@
  *   lore index                print the knowledge index (Orient injects this)
  *   lore recall <file>        print full notes anchored to <file>
  *   lore list                 list note ids + anchors
- *   lore capture [range]      propose notes from a git diff -> .lore/proposed/  (needs LLM)
- *   lore accept [id]          move reviewed drafts from proposed/ into notes/
+ *   lore capture [range]      auto: mine a diff for notes, verify, write to notes/ (needs LLM)
  *   lore check [base]         flag notes whose code changed as possibly stale     (needs LLM)
  *   lore log                  summarize recall events (coverage/retrieval)
  *   lore eval [--runs=N]      held-out control-vs-treatment injection-lift eval   (needs LLM)
  *   lore hook session-start   (Orient) emit the index as JSON
  *   lore hook pre-tool-use    (Guard) emit notes for the file being edited
- *   lore hook stop            (Capture, opt-in) propose notes at session end
+ *   lore hook stop            (Capture) auto-capture from the session, verify, write
  */
-import { runAccept, runCapture } from "./capture";
+import { runCapture } from "./capture";
 import { runCheck } from "./check";
 import { runEval } from "./eval";
 import { preToolUseOutput, readHookInput, sessionStartOutput } from "./hooks";
@@ -71,11 +70,6 @@ async function main(): Promise<void> {
       return;
     }
 
-    case "accept": {
-      runAccept(rest);
-      return;
-    }
-
     case "check": {
       try {
         await runCheck(rest);
@@ -118,10 +112,11 @@ async function main(): Promise<void> {
       }
 
       if (sub === "stop") {
-        // Opt-in auto-capture. Silent + best-effort — must never block session end.
+        // Auto-capture from the finished session. Silent + best-effort — must
+        // never block session end, and no-ops if no LLM is configured.
         if (llmConfigured()) {
           try {
-            await runCapture([], process.cwd(), { quiet: true });
+            await runCapture([], process.cwd(), { quiet: true, transcriptPath: input.transcript_path });
           } catch {
             /* capture is best-effort at session end */
           }
@@ -134,7 +129,7 @@ async function main(): Promise<void> {
 
     default:
       fail(
-        "commands: setup | init | index | recall <file> | list | capture [range] | accept [id] | " +
+        "commands: setup | init | index | recall <file> | list | capture [range] | " +
           "check [base] | log | eval | hook <session-start|pre-tool-use|stop>",
       );
   }

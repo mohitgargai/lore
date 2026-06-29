@@ -1,8 +1,5 @@
-import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { runAccept } from "./capture";
+import { parseTranscript } from "./capture";
 import { loadCases, scores } from "./eval";
 import { extractJson } from "./llm";
 import { type LogEvent, summarizeLog } from "./log";
@@ -59,13 +56,22 @@ describe("matchedFiles", () => {
   });
 });
 
-describe("accept", () => {
-  it("moves a proposed draft into notes/", () => {
-    const cwd = mkdtempSync(join(tmpdir(), "lore-"));
-    mkdirSync(join(cwd, ".lore", "proposed"), { recursive: true });
-    writeFileSync(join(cwd, ".lore", "proposed", "d.md"), "---\nid: d\n---\nbody");
-    runAccept(["d"], cwd);
-    expect(readdirSync(join(cwd, ".lore", "notes"))).toContain("d.md");
+describe("parseTranscript", () => {
+  it("condenses JSONL into role-tagged turns and skips junk", () => {
+    const raw = [
+      JSON.stringify({ message: { role: "user", content: "rename x to y" } }),
+      JSON.stringify({
+        type: "tool_use",
+        message: { role: "assistant", content: [{ type: "text", text: "x is load-bearing" }] },
+      }),
+      "not json",
+    ].join("\n");
+    const out = parseTranscript(raw);
+    expect(out).toContain("user: rename x to y");
+    expect(out).toContain("assistant: x is load-bearing");
+  });
+  it("ignores non-message events", () => {
+    expect(parseTranscript('{"type":"system"}\n')).toBe("");
   });
 });
 

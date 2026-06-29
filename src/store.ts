@@ -21,8 +21,8 @@ export interface Note {
 export const LORE_DIR = ".lore";
 export const NOTES_DIR = join(LORE_DIR, "notes");
 
-/** Local-only artifacts kept out of git (telemetry + unreviewed drafts). */
-export const LORE_GITIGNORE = "recall-log.jsonl\nproposed/\n";
+/** Local-only artifacts kept out of git (per-developer telemetry). */
+export const LORE_GITIGNORE = "recall-log.jsonl\n";
 
 /** Parse one note from its raw file contents. Pure — easy to test. */
 export function parseNoteContent(raw: string, fallbackId: string): Note | null {
