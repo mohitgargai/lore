@@ -103,7 +103,7 @@ you). Or set env vars (which always override the saved config — handy for CI):
 
 ```bash
 export LORE_LLM_BASE_URL=https://api.openai.com/v1   # or http://localhost:11434/v1 (Ollama)
-export LORE_LLM_MODEL=gpt-4o-mini                    # or a local model
+export LORE_LLM_MODEL=gpt-5.4-mini                   # or a local model
 export LORE_LLM_API_KEY=...                          # or OPENAI_API_KEY; omit for local
 ```
 

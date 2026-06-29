@@ -16,7 +16,7 @@ import { complete } from "./llm";
 // cheap out. Local/custom can't be known, so those are asked. Always overridable
 // via LORE_LLM_MODEL.
 const PRESETS: Record<string, { baseUrl: string; model?: string }> = {
-  "1": { baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+  "1": { baseUrl: "https://api.openai.com/v1", model: "gpt-5.4-mini" },
   "2": { baseUrl: "http://localhost:11434/v1" }, // local: model is whatever you've pulled
   "3": { baseUrl: "https://api.anthropic.com/v1", model: "claude-sonnet-4-6" },
 };
