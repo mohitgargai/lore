@@ -35,7 +35,7 @@ function git(args: string[]): string {
   }
 }
 
-const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n) + "\n…(truncated)" : s);
+const truncate = (s: string, n: number) => (s.length > n ? `${s.slice(0, n)}\n…(truncated)` : s);
 
 export async function runCapture(
   args: string[],

@@ -1,16 +1,18 @@
-import { mkdtempSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { runAccept } from "./capture";
 import { loadCases, scores } from "./eval";
 import { extractJson } from "./llm";
-import { summarizeLog, type LogEvent } from "./log";
+import { type LogEvent, summarizeLog } from "./log";
 import { matchedFiles, parseNoteContent } from "./store";
 
 describe("eval scoring", () => {
   it("passes when all includes present and no excludes present", () => {
-    expect(scores("use db.users.update(id, {status:'deleted'})", { includes: ["status"], excludes: ["users.delete"] })).toBe(true);
+    expect(
+      scores("use db.users.update(id, {status:'deleted'})", { includes: ["status"], excludes: ["users.delete"] }),
+    ).toBe(true);
   });
   it("fails when an excluded term appears", () => {
     expect(scores("call db.users.delete(id)", { includes: ["status"], excludes: ["users.delete"] })).toBe(false);

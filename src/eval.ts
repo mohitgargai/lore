@@ -71,7 +71,9 @@ export async function runEval(args: string[]): Promise<void> {
     const lift = (treat - ctrl) / runs;
     liftSum += lift;
     console.log(`${c.id}`);
-    console.log(`  control ${Math.round((ctrl / runs) * 100)}%   treatment ${Math.round((treat / runs) * 100)}%   lift ${pct(lift)}`);
+    console.log(
+      `  control ${Math.round((ctrl / runs) * 100)}%   treatment ${Math.round((treat / runs) * 100)}%   lift ${pct(lift)}`,
+    );
   }
   console.log(`\nmean injection lift: ${pct(liftSum / cases.length)}`);
   console.log("~0 lift on cases a model already knows is expected — lift should concentrate on non-derivable facts.");

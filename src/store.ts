@@ -2,7 +2,7 @@
  * The store: plain markdown notes under `.lore/notes/`, each with YAML
  * frontmatter. No database — the corpus is small and lives in git.
  */
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import matter from "gray-matter";
 import mm from "micromatch";

@@ -21,7 +21,7 @@ function git(args: string[]): string {
   }
 }
 
-const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n) + "\n…(truncated)" : s);
+const truncate = (s: string, n: number) => (s.length > n ? `${s.slice(0, n)}\n…(truncated)` : s);
 
 export async function runCheck(args: string[], cwd: string = process.cwd()): Promise<void> {
   const base = args.find((a) => !a.startsWith("--"));

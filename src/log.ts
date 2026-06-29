@@ -23,7 +23,7 @@ export function logEvent(ev: Omit<LogEvent, "ts">, cwd: string = process.cwd()):
     const dir = join(cwd, LORE_DIR);
     if (!existsSync(dir)) return;
     ensureGitignored(dir);
-    appendFileSync(join(dir, LOG_NAME), JSON.stringify({ ts: new Date().toISOString(), ...ev }) + "\n");
+    appendFileSync(join(dir, LOG_NAME), `${JSON.stringify({ ts: new Date().toISOString(), ...ev })}\n`);
   } catch {
     /* a hook must keep working even if logging fails */
   }

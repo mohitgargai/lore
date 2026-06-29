@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { notesForFile, parseNoteContent, renderGuard, renderIndex, type Note } from "./store";
+import { type Note, notesForFile, parseNoteContent, renderGuard, renderIndex } from "./store";
 
 const RAW = `---
 id: export-async-ratelimit

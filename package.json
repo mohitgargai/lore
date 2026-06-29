@@ -38,6 +38,8 @@
     "dev": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "lint": "biome check",
+    "format": "biome check --write",
     "prepare": "tsup",
     "prepublishOnly": "npm run build"
   },
@@ -46,6 +48,7 @@
     "micromatch": "^4.0.8"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.1",
     "@types/micromatch": "^4.0.9",
     "@types/node": "^22.10.0",
     "tsup": "^8.3.5",

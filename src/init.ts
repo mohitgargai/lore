@@ -114,7 +114,7 @@ function wireHooks(cwd: string): void {
     hooks: [{ type: "command", command: GUARD_COMMAND }],
   });
 
-  writeFileSync(file, JSON.stringify(settings, null, 2) + "\n");
+  writeFileSync(file, `${JSON.stringify(settings, null, 2)}\n`);
 }
 
 /** Append an entry to hooks[event] unless its command is already present. */

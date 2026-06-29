@@ -36,7 +36,7 @@ export function loadConfig(): LoreConfig {
 export function saveConfig(c: LoreConfig): string {
   const p = configPath();
   mkdirSync(dirname(p), { recursive: true });
-  writeFileSync(p, JSON.stringify(c, null, 2) + "\n", { mode: 0o600 });
+  writeFileSync(p, `${JSON.stringify(c, null, 2)}\n`, { mode: 0o600 });
   try {
     chmodSync(p, 0o600); // in case the file already existed with looser perms
   } catch {

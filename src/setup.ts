@@ -42,9 +42,13 @@ export async function runSetup(cwd: string = process.cwd()): Promise<void> {
 
     let baseUrl = PRESETS[choice] ?? "";
     if (!baseUrl) {
-      baseUrl = (await rl.question(`Base URL${existing.baseUrl ? ` [${existing.baseUrl}]` : ""}: `)).trim() || existing.baseUrl || "";
+      baseUrl =
+        (await rl.question(`Base URL${existing.baseUrl ? ` [${existing.baseUrl}]` : ""}: `)).trim() ||
+        existing.baseUrl ||
+        "";
     }
-    const model = (await rl.question(`Model${existing.model ? ` [${existing.model}]` : ""}: `)).trim() || existing.model || "";
+    const model =
+      (await rl.question(`Model${existing.model ? ` [${existing.model}]` : ""}: `)).trim() || existing.model || "";
     const local = choice === "2";
     const keyPrompt = `API key${local ? " (optional for local)" : ""}${existing.apiKey ? " [keep existing]" : ""}: `;
     const apiKey = (await rl.question(keyPrompt)).trim() || existing.apiKey || "";
@@ -63,7 +67,7 @@ export async function runSetup(cwd: string = process.cwd()): Promise<void> {
       console.log("ok");
     } catch (e) {
       console.log("failed");
-      console.log("  " + (e instanceof Error ? e.message.split("\n")[0] : String(e)));
+      console.log(`  ${e instanceof Error ? e.message.split("\n")[0] : String(e)}`);
       console.log("  (config saved anyway — fix the endpoint/key and re-run lore setup)");
     }
 

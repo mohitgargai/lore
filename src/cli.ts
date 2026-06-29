@@ -1,5 +1,5 @@
 /**
- * lore — in-repo, agent-native tacit knowledge. (Orient slice.)
+ * lore — in-repo, agent-native tacit knowledge for coding agents.
  *
  *   lore setup                guided activation: configure LLM/key, then init the repo
  *   lore init                 scaffold .lore/ + wire the hooks (no prompts)
@@ -39,7 +39,7 @@ async function main(): Promise<void> {
 
     case "index": {
       const out = renderIndex(loadNotes());
-      if (out) process.stdout.write(out + "\n");
+      if (out) process.stdout.write(`${out}\n`);
       return;
     }
 
@@ -48,7 +48,7 @@ async function main(): Promise<void> {
       if (!file) fail("usage: lore recall <file>");
       const notes = notesForFile(loadNotes(), file);
       if (notes.length === 0) return; // silence is fine — nothing anchored here
-      process.stdout.write(notes.map((n) => `--- ${n.id} ---\n${n.body}`).join("\n\n") + "\n");
+      process.stdout.write(`${notes.map((n) => `--- ${n.id} ---\n${n.body}`).join("\n\n")}\n`);
       return;
     }
 
@@ -58,7 +58,7 @@ async function main(): Promise<void> {
     }
 
     case "log": {
-      process.stdout.write(summarizeLog(readLog()) + "\n");
+      process.stdout.write(`${summarizeLog(readLog())}\n`);
       return;
     }
 
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
         return;
       }
 
-      fail(`unknown hook: ${sub ?? ""}`);
+      return fail(`unknown hook: ${sub ?? ""}`);
     }
 
     default:
