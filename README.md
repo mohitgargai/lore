@@ -19,7 +19,11 @@ non-obvious. That's the whole loop.
 
 ## Install
 
-Not on npm yet. Clone and link it:
+```bash
+npm install -g @mohitgargai/lore
+```
+
+Or from source:
 
 ```bash
 npm install

@@ -1,5 +1,5 @@
 {
-  "name": "lore",
+  "name": "@mohitgargai/lore",
   "version": "0.0.1",
   "description": "In-repo, agent-native tacit knowledge for coding agents: facts the code can't show, surfaced to Claude Code at session start and right before edits.",
   "keywords": [
@@ -22,6 +22,9 @@
   },
   "license": "Apache-2.0",
   "author": "Mohit Garg",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "lore": "dist/cli.js"
