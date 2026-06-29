@@ -1,6 +1,6 @@
 /**
- * Recall logging — measures the RETRIEVAL factor: how often a note actually
- * fires, on which files. A fire is necessary, not sufficient — this is the
+ * Recall logging, measures the RETRIEVAL factor: how often a note actually
+ * fires, on which files. A fire is necessary, not sufficient, this is the
  * denominator and the substrate for hand-labeling saves, not a value metric.
  *
  * Best-effort and append-only. Logging must NEVER break a hook.
@@ -29,7 +29,7 @@ export function logEvent(ev: Omit<LogEvent, "ts">, cwd: string = process.cwd()):
   }
 }
 
-/** Keep the log local — it's per-developer telemetry, not shared knowledge. */
+/** Keep the log local, it's per-developer telemetry, not shared knowledge. */
 function ensureGitignored(dir: string): void {
   const gi = join(dir, ".gitignore");
   try {

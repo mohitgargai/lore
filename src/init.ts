@@ -1,5 +1,5 @@
 /**
- * `lore init` — scaffold the store in the current repo and wire lore's hooks
+ * `lore init`, scaffold the store in the current repo and wire lore's hooks
  * (Orient, Guard, Capture) into .claude/settings.json.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -18,14 +18,14 @@ confidence: low
 created: ${today}
 source: seed
 ---
-This is an example lore note — delete it once you've written a real one.
+This is an example lore note, delete it once you've written a real one.
 
 A good note captures something the code itself can't tell a future agent:
 a decision and its reason, a gotcha that looks like a bug but isn't, an
 invariant that spans files. Keep it to one idea, anchored to where it lives.
 `;
 
-const README = `# .lore — repo knowledge
+const README = `# .lore, repo knowledge
 
 Plain-markdown notes capturing the *tacit* knowledge of this codebase:
 decisions, flows, invariants, and gotchas the code can't express on its own.
@@ -61,9 +61,9 @@ One idea, stated plainly. Anchor it to every file it touches.
 
 ## How it reaches the agent
 Three Claude Code hooks, wired by \`lore init\`:
-- **Orient** — at session start, the index of these notes is injected.
-- **Guard** — right before an edit, the full note for that file is injected.
-- **Capture** — at session end, new notes are auto-captured (needs an LLM).
+- **Orient**: at session start, the index of these notes is injected.
+- **Guard**: right before an edit, the full note for that file is injected.
+- **Capture**: at session end, new notes are auto-captured (needs an LLM).
 
 Run \`lore index\` to see what the agent gets. Notes appear here either by
 auto-capture or by you adding a markdown file.
@@ -106,7 +106,7 @@ function wireHooks(cwd: string): void {
     try {
       settings = JSON.parse(readFileSync(file, "utf8"));
     } catch {
-      console.warn("! .claude/settings.json wasn't valid JSON — leaving it untouched.");
+      console.warn("! .claude/settings.json wasn't valid JSON, leaving it untouched.");
       console.warn("! Add these hooks manually:");
       console.warn(`!   SessionStart            -> "${ORIENT_COMMAND}"`);
       console.warn(`!   PreToolUse "Edit|Write" -> "${GUARD_COMMAND}"`);

@@ -1,5 +1,5 @@
 /**
- * lore — in-repo, agent-native tacit knowledge for coding agents.
+ * lore, in-repo, agent-native tacit knowledge for coding agents.
  *
  *   lore setup                guided activation: configure LLM/key, then init the repo
  *   lore init                 scaffold .lore/ + wire the hooks (no prompts)
@@ -46,7 +46,7 @@ async function main(): Promise<void> {
       const file = rest[0];
       if (!file) fail("usage: lore recall <file>");
       const notes = notesForFile(loadNotes(), file);
-      if (notes.length === 0) return; // silence is fine — nothing anchored here
+      if (notes.length === 0) return; // silence is fine, nothing anchored here
       process.stdout.write(`${notes.map((n) => `--- ${n.id} ---\n${n.body}`).join("\n\n")}\n`);
       return;
     }
@@ -112,7 +112,7 @@ async function main(): Promise<void> {
       }
 
       if (sub === "stop") {
-        // Auto-capture from the finished session. Silent + best-effort — must
+        // Auto-capture from the finished session. Silent + best-effort, must
         // never block session end, and no-ops if no LLM is configured.
         if (llmConfigured()) {
           try {

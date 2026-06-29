@@ -6,8 +6,8 @@
   in the repository. Environment variables override the file, so CI can stay
   env-only.
 - The recall log and unreviewed drafts under `.lore/` are gitignored.
-- Auto-capture and `lore check` send your git diff — and, for capture, a tail of
-  the session transcript — to the LLM endpoint you configure. If your code can't
+- Auto-capture and `lore check` send your git diff, and, for capture, a tail of
+  the session transcript, to the LLM endpoint you configure. If your code can't
   leave your machine, point them at a local model (e.g. Ollama); the endpoint is
   yours to choose.
 

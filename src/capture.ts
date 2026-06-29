@@ -1,9 +1,9 @@
 /**
- * Auto-capture — fully automatic, no human in the loop. Triggered at session end
+ * Auto-capture, fully automatic, no human in the loop. Triggered at session end
  * (the Stop hook), it mines the session for durable, non-derivable notes, biased
  * to the high-signal moments (the user corrected the agent, or a non-obvious
- * constraint caused rework). Each candidate then passes a skeptical verify step
- * — that verify IS the approval. Survivors are written straight to .lore/notes/.
+ * constraint caused rework). Each candidate then passes a skeptical verify step;
+ * that verify IS the approval. Survivors are written straight to .lore/notes/.
  *
  * There is no manual review: a corpus that needs someone to run a command and
  * click accept stays empty. Precision comes from corrections-bias + verify, not
@@ -78,7 +78,7 @@ A note qualifies ONLY if all three hold:
 2. Knowing it changes what the agent does.
 3. It will still be true next month.
 Write each note as a FACT/rationale, never an instruction. Anchor to the file globs it concerns.
-Return [] if nothing qualifies — silence is correct when there's no durable lesson.`;
+Return [] if nothing qualifies, silence is correct when there's no durable lesson.`;
 
 export async function runCapture(
   args: string[],
@@ -98,7 +98,7 @@ export async function runCapture(
     try {
       transcript = parseTranscript(readFileSync(opts.transcriptPath, "utf8"));
     } catch {
-      /* no/unreadable transcript — fall back to diff only */
+      /* no/unreadable transcript, fall back to diff only */
     }
   }
 
@@ -131,7 +131,7 @@ export async function runCapture(
 
     const verdict = await verify(c, diff);
     if (!verdict.keep) {
-      say(`  skip ${c.id} — ${verdict.reason}`);
+      say(`  skip ${c.id}, ${verdict.reason}`);
       continue;
     }
     writeFileSync(path, frontmatter(c, verdict.confidence));
@@ -145,8 +145,8 @@ export async function runCapture(
 async function verify(c: Candidate, diff: string): Promise<Verdict> {
   const prompt =
     `Act as a skeptical senior engineer reviewing a candidate repo-knowledge note.\n` +
-    `Keep it ONLY if it is a real, durable, NON-derivable fact about THIS codebase — not generic ` +
-    `best-practice, not transient, not already obvious from the code — and consistent with the change below.\n\n` +
+    `Keep it ONLY if it is a real, durable, NON-derivable fact about THIS codebase, not generic ` +
+    `best-practice, not transient, not already obvious from the code, and consistent with the change below.\n\n` +
     `NOTE: ${c.body}\n\nCHANGE:\n${truncate(diff, 6000)}\n\n` +
     `Return {"keep": boolean, "confidence": "high|medium|low", "reason": "one short line"}. Default keep=false if unsure.`;
   try {

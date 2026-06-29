@@ -1,5 +1,5 @@
 /**
- * `lore setup` — guided activation. Configures the LLM endpoint/key for
+ * `lore setup`, guided activation. Configures the LLM endpoint/key for
  * capture & check (persisted to a home-dir config), validates it, and offers to
  * activate lore in the current repo. The orient/guard core needs none of this.
  */
@@ -11,7 +11,7 @@ import { loadConfig, saveConfig } from "./config";
 import { runInit } from "./init";
 import { complete } from "./llm";
 
-// We pick a balanced default model per hosted provider — capture/verify
+// We pick a balanced default model per hosted provider, capture/verify
 // precision is what matters, and the calls are small, so this isn't the place to
 // cheap out. Local/custom can't be known, so those are asked. Always overridable
 // via LORE_LLM_MODEL.
@@ -24,7 +24,7 @@ const PRESETS: Record<string, { baseUrl: string; model?: string }> = {
 export async function runSetup(cwd: string = process.cwd()): Promise<void> {
   if (!stdin.isTTY) {
     console.log(
-      "lore setup is interactive — run it in a terminal.\n" +
+      "lore setup is interactive, run it in a terminal.\n" +
         "Or configure env vars: LORE_LLM_BASE_URL, LORE_LLM_MODEL, LORE_LLM_API_KEY.",
     );
     return;
@@ -33,7 +33,7 @@ export async function runSetup(cwd: string = process.cwd()): Promise<void> {
   const rl = createInterface({ input: stdin, output: stdout });
   try {
     console.log("Set up lore's LLM access for capture & check.");
-    console.log("(The session index and pre-edit guard need no key — this is only for the LLM-backed commands.)\n");
+    console.log("(The session index and pre-edit guard need no key; this is only for the LLM-backed commands.)\n");
 
     const existing = loadConfig();
 
@@ -70,7 +70,7 @@ export async function runSetup(cwd: string = process.cwd()): Promise<void> {
     const apiKey = (await rl.question(keyPrompt)).trim() || existing.apiKey || "";
 
     if (!baseUrl || !model) {
-      console.log("\nBase URL and model are required — nothing saved.");
+      console.log("\nBase URL and model are required, nothing saved.");
       return;
     }
 
@@ -84,7 +84,7 @@ export async function runSetup(cwd: string = process.cwd()): Promise<void> {
     } catch (e) {
       console.log("failed");
       console.log(`  ${e instanceof Error ? e.message.split("\n")[0] : String(e)}`);
-      console.log("  (config saved anyway — fix the endpoint/key and re-run lore setup)");
+      console.log("  (config saved anyway, fix the endpoint/key and re-run lore setup)");
     }
 
     if (!existsSync(join(cwd, ".lore"))) {
@@ -95,7 +95,7 @@ export async function runSetup(cwd: string = process.cwd()): Promise<void> {
       }
     }
 
-    console.log("\nDone. capture & check are ready — try: lore capture");
+    console.log("\nDone. capture & check are ready, try: lore capture");
   } finally {
     rl.close();
   }

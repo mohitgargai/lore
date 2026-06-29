@@ -1,5 +1,5 @@
 /**
- * Check — the keep-it-true piece. Given a code change, find notes anchored to the
+ * Check, the keep-it-true piece. Given a code change, find notes anchored to the
  * changed files and ask the model whether the change makes each note's claim
  * false. Prints a verdict per note; exits non-zero if any look stale, so it can
  * gate a PR. This is the one thing a flat doc / CLAUDE.md can't do for you.
@@ -36,7 +36,7 @@ export async function runCheck(args: string[], cwd: string = process.cwd()): Pro
 
   const notes = loadNotes(cwd).filter((n) => matchedFiles(n, changed).length > 0);
   if (notes.length === 0) {
-    console.log("No notes are anchored to the changed files — nothing to check.");
+    console.log("No notes are anchored to the changed files, nothing to check.");
     return;
   }
 
@@ -46,11 +46,11 @@ export async function runCheck(args: string[], cwd: string = process.cwd()): Pro
     const v = await judge(n, changed, base);
     if (v.verdict === "stale") stale++;
     const tag = v.verdict === "stale" ? "STALE  " : v.verdict === "unclear" ? "unclear" : "ok     ";
-    console.log(`[${tag}] ${n.id} — ${v.reason}`);
+    console.log(`[${tag}] ${n.id}, ${v.reason}`);
   }
 
   if (stale > 0) {
-    console.log(`\n${stale} note(s) may be stale — review and update or retire them.`);
+    console.log(`\n${stale} note(s) may be stale, review and update or retire them.`);
     process.exitCode = 1;
   } else {
     console.log("\nAll touched notes still supported by the code.");

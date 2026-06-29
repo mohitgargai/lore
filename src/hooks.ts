@@ -1,8 +1,8 @@
 /**
  * Claude Code hook I/O.
  *
- * Orient  — SessionStart  → inject the knowledge index (titles + anchors).
- * Guard   — PreToolUse(Edit|Write) → inject the full note for the file being
+ * Orient: SessionStart → inject the knowledge index (titles + anchors).
+ * Guard:  PreToolUse(Edit|Write) → inject the full note for the file being
  *           edited, right before the write. Advisory: it adds context, it does
  *           not block the edit.
  *

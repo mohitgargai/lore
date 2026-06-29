@@ -1,8 +1,8 @@
 /**
- * Held-out eval — measures the INJECTION-LIFT factor: given a note, does it flip
+ * Held-out eval, measures the INJECTION-LIFT factor: given a note, does it flip
  * a model's answer? It hands the note directly to the model, so it ASSUMES
  * perfect retrieval and is therefore an UPPER BOUND on real value. Pair it with
- * the recall log (retrieval) and your miss tally (coverage) — the three multiply.
+ * the recall log (retrieval) and your miss tally (coverage), the three multiply.
  *
  * Provider-agnostic: any OpenAI-compatible endpoint via env (incl. local models).
  * Scoring is a transparent keyword heuristic; answers are clear-cut by design,
@@ -35,7 +35,7 @@ function controlPrompt(c: EvalCase): string {
 }
 function treatmentPrompt(c: EvalCase): string {
   return (
-    `[repo knowledge injected before your edit — background context, treat as fact and reason from it]\n` +
+    `[repo knowledge injected before your edit, background context, treat as fact and reason from it]\n` +
     `${c.note}\n[end]\n\n` +
     controlPrompt(c)
   );
@@ -58,7 +58,7 @@ export async function runEval(args: string[]): Promise<void> {
   const cases = loadCases(path);
 
   console.log(`Held-out eval: ${cases.length} cases x ${runs} runs, control vs treatment.`);
-  console.log("Measures INJECTION LIFT only (assumes perfect retrieval) — an upper bound on real value.\n");
+  console.log("Measures INJECTION LIFT only (assumes perfect retrieval), an upper bound on real value.\n");
 
   let liftSum = 0;
   for (const c of cases) {
@@ -76,5 +76,5 @@ export async function runEval(args: string[]): Promise<void> {
     );
   }
   console.log(`\nmean injection lift: ${pct(liftSum / cases.length)}`);
-  console.log("~0 lift on cases a model already knows is expected — lift should concentrate on non-derivable facts.");
+  console.log("~0 lift on cases a model already knows is expected, lift should concentrate on non-derivable facts.");
 }

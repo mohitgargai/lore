@@ -1,6 +1,6 @@
 /**
  * The store: plain markdown notes under `.lore/notes/`, each with YAML
- * frontmatter. No database — the corpus is small and lives in git.
+ * frontmatter. No database, the corpus is small and lives in git.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -24,7 +24,7 @@ export const NOTES_DIR = join(LORE_DIR, "notes");
 /** Local-only artifacts kept out of git (per-developer telemetry). */
 export const LORE_GITIGNORE = "recall-log.jsonl\n";
 
-/** Parse one note from its raw file contents. Pure — easy to test. */
+/** Parse one note from its raw file contents. Pure, easy to test. */
 export function parseNoteContent(raw: string, fallbackId: string): Note | null {
   const { data, content } = matter(raw);
   const body = content.trim();
@@ -70,19 +70,19 @@ export function matchedFiles(note: Note, files: string[]): string[] {
 
 /**
  * The Orient index: a compact map of repo knowledge, cheap to keep in context.
- * Titles + where each note lives — not the full bodies. The agent pulls the
+ * Titles + where each note lives, not the full bodies. The agent pulls the
  * full note with `lore recall <file>` before touching a listed area.
  */
 export function renderIndex(notes: Note[]): string {
   if (notes.length === 0) return "";
   const lines = notes.map((n) => {
-    const where = n.anchors.length ? ` — \`${n.anchors.join("`, `")}\`` : "";
+    const where = n.anchors.length ? `, \`${n.anchors.join("`, `")}\`` : "";
     return `- **${n.title}**${where}`;
   });
   return [
     "## Repo knowledge (lore)",
     "",
-    "Tacit context the code can't show — decisions, gotchas, invariants from past sessions.",
+    "Tacit context the code can't show, decisions, gotchas, invariants from past sessions.",
     "Treat these as hints, not gospel; verify against the current code.",
     "",
     ...lines,
@@ -98,8 +98,8 @@ export function renderIndex(notes: Note[]): string {
 export function renderGuard(notes: Note[], file: string): string {
   if (notes.length === 0) return "";
   return [
-    `About to edit \`${file}\`. Repo knowledge (lore) for this area, from past work —`,
-    "hints, not gospel; verify against the current code:",
+    `About to edit \`${file}\`. Repo knowledge (lore) for this area, from past work.`,
+    "Hints, not gospel; verify against the current code:",
     "",
     notes.map((n) => n.body).join("\n\n"),
   ].join("\n");
