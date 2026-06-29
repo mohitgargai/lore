@@ -11,10 +11,14 @@ import { loadConfig, saveConfig } from "./config";
 import { runInit } from "./init";
 import { complete } from "./llm";
 
-const PRESETS: Record<string, string> = {
-  "1": "https://api.openai.com/v1",
-  "2": "http://localhost:11434/v1",
-  "3": "https://api.anthropic.com/v1",
+// We pick a balanced default model per hosted provider — capture/verify
+// precision is what matters, and the calls are small, so this isn't the place to
+// cheap out. Local/custom can't be known, so those are asked. Always overridable
+// via LORE_LLM_MODEL.
+const PRESETS: Record<string, { baseUrl: string; model?: string }> = {
+  "1": { baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+  "2": { baseUrl: "http://localhost:11434/v1" }, // local: model is whatever you've pulled
+  "3": { baseUrl: "https://api.anthropic.com/v1", model: "claude-sonnet-4-6" },
 };
 
 export async function runSetup(cwd: string = process.cwd()): Promise<void> {
@@ -40,16 +44,28 @@ export async function runSetup(cwd: string = process.cwd()): Promise<void> {
     console.log("  4) custom");
     const choice = (await rl.question("Choose [1-4] (default 1): ")).trim() || "1";
 
-    let baseUrl = PRESETS[choice] ?? "";
+    const preset = PRESETS[choice];
+    const local = choice === "2";
+
+    let baseUrl = preset?.baseUrl ?? "";
     if (!baseUrl) {
       baseUrl =
         (await rl.question(`Base URL${existing.baseUrl ? ` [${existing.baseUrl}]` : ""}: `)).trim() ||
         existing.baseUrl ||
         "";
     }
-    const model =
-      (await rl.question(`Model${existing.model ? ` [${existing.model}]` : ""}: `)).trim() || existing.model || "";
-    const local = choice === "2";
+
+    // Hosted providers: we choose the model. Local/custom: we have to ask.
+    let model = preset?.model ?? "";
+    if (model) {
+      console.log(`Model: ${model}  (chosen for this provider; override anytime with LORE_LLM_MODEL)`);
+    } else {
+      const hint = local ? " (a model you've pulled, e.g. llama3.1)" : "";
+      model =
+        (await rl.question(`Model${hint}${existing.model ? ` [${existing.model}]` : ""}: `)).trim() ||
+        existing.model ||
+        "";
+    }
     const keyPrompt = `API key${local ? " (optional for local)" : ""}${existing.apiKey ? " [keep existing]" : ""}: `;
     const apiKey = (await rl.question(keyPrompt)).trim() || existing.apiKey || "";
 
