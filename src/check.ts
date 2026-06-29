@@ -1,17 +1,12 @@
 /**
- * Check, the keep-it-true piece. Given a code change, find notes anchored to the
- * changed files and ask the model whether the change makes each note's claim
- * false. Prints a verdict per note; exits non-zero if any look stale, so it can
- * gate a PR. This is the one thing a flat doc / CLAUDE.md can't do for you.
+ * Check, keyless. Given a code change, flag the notes anchored to the changed
+ * files so they get re-read. It does not judge whether a note is actually false
+ * (that needs a model, and the agent does that in-session via the recording
+ * instruction); this is the cheap mechanical reminder, suitable for CI. Exits
+ * non-zero if any note's code changed, so it can surface on a PR.
  */
 import { execFileSync } from "node:child_process";
-import { completeJSON } from "./llm";
-import { loadNotes, matchedFiles, type Note } from "./store";
-
-interface Verdict {
-  verdict: "supported" | "stale" | "unclear";
-  reason: string;
-}
+import { loadNotes, matchedFiles } from "./store";
 
 function git(args: string[]): string {
   try {
@@ -21,9 +16,7 @@ function git(args: string[]): string {
   }
 }
 
-const truncate = (s: string, n: number) => (s.length > n ? `${s.slice(0, n)}\n…(truncated)` : s);
-
-export async function runCheck(args: string[], cwd: string = process.cwd()): Promise<void> {
+export function runCheck(args: string[], cwd: string = process.cwd()): void {
   const base = args.find((a) => !a.startsWith("--"));
   const changed = git(base ? ["diff", "--name-only", base] : ["diff", "--name-only", "HEAD"])
     .split("\n")
@@ -34,37 +27,18 @@ export async function runCheck(args: string[], cwd: string = process.cwd()): Pro
     return;
   }
 
-  const notes = loadNotes(cwd).filter((n) => matchedFiles(n, changed).length > 0);
-  if (notes.length === 0) {
-    console.log("No notes are anchored to the changed files, nothing to check.");
+  const flagged = loadNotes(cwd)
+    .map((n) => ({ note: n, files: matchedFiles(n, changed) }))
+    .filter((x) => x.files.length > 0);
+
+  if (flagged.length === 0) {
+    console.log("No notes are anchored to the changed files.");
     return;
   }
 
-  console.log(`Checking ${notes.length} note(s) against the change...\n`);
-  let stale = 0;
-  for (const n of notes) {
-    const v = await judge(n, changed, base);
-    if (v.verdict === "stale") stale++;
-    const tag = v.verdict === "stale" ? "STALE  " : v.verdict === "unclear" ? "unclear" : "ok     ";
-    console.log(`[${tag}] ${n.id}, ${v.reason}`);
+  console.log("These notes cover code that changed. Re-read them and update any that are now wrong:\n");
+  for (const { note, files } of flagged) {
+    console.log(`  ${note.id}  (${files.join(", ")})`);
   }
-
-  if (stale > 0) {
-    console.log(`\n${stale} note(s) may be stale, review and update or retire them.`);
-    process.exitCode = 1;
-  } else {
-    console.log("\nAll touched notes still supported by the code.");
-  }
-}
-
-async function judge(note: Note, changed: string[], base?: string): Promise<Verdict> {
-  const files = [...new Set(matchedFiles(note, changed))];
-  const range = base ?? "HEAD";
-  const diff = git(["diff", range, "--", ...files]);
-  const prompt =
-    `A repo-knowledge note and a code change. Decide whether the change makes the note's claim FALSE.\n\n` +
-    `NOTE:\n${note.body}\n\nDIFF:\n${truncate(diff, 8000)}\n\n` +
-    `Return JSON {"verdict":"supported|stale|unclear","reason":"one short line"}. ` +
-    `"stale" only if the change clearly contradicts the note; "unclear" if you can't tell.`;
-  return completeJSON<Verdict>(prompt);
+  process.exitCode = 1;
 }

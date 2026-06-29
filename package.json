@@ -27,8 +27,7 @@
     "lore": "dist/cli.js"
   },
   "files": [
-    "dist",
-    "eval"
+    "dist"
   ],
   "engines": {
     "node": ">=20"

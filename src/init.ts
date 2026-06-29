@@ -1,6 +1,6 @@
 /**
  * `lore init`, scaffold the store in the current repo and wire lore's hooks
- * (Orient, Guard, Capture) into .claude/settings.json.
+ * (Orient, Guard) into .claude/settings.json.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -8,7 +8,6 @@ import { LORE_GITIGNORE } from "./store";
 
 const ORIENT_COMMAND = "lore hook session-start";
 const GUARD_COMMAND = "lore hook pre-tool-use";
-const CAPTURE_COMMAND = "lore hook stop";
 
 const SAMPLE_NOTE = (today: string) => `---
 id: example-delete-me
@@ -60,13 +59,14 @@ One idea, stated plainly. Anchor it to every file it touches.
 \`\`\`
 
 ## How it reaches the agent
-Three Claude Code hooks, wired by \`lore init\`:
-- **Orient**: at session start, the index of these notes is injected.
+Two Claude Code hooks, wired by \`lore init\` (no API key, no network calls):
+- **Orient**: at session start, the index plus a short instruction to record new
+  knowledge is injected.
 - **Guard**: right before an edit, the full note for that file is injected.
-- **Capture**: at session end, new notes are auto-captured (needs an LLM).
 
-Run \`lore index\` to see what the agent gets. Notes appear here either by
-auto-capture or by you adding a markdown file.
+Notes are written by the agent itself when it learns something durable, using its
+own tools; you can also add a markdown file by hand. Run \`lore index\` to see
+what the agent gets.
 `;
 
 export function runInit(cwd: string): void {
@@ -87,12 +87,11 @@ export function runInit(cwd: string): void {
   wireHooks(cwd);
 
   console.log("created .lore/ with an example note (replace it with a real one)");
-  console.log("wired three hooks into .claude/settings.json:");
-  console.log("  SessionStart            -> injects the knowledge index (Orient)");
+  console.log("wired two hooks into .claude/settings.json (no API key needed):");
+  console.log("  SessionStart            -> injects the index + a note-recording instruction (Orient)");
   console.log("  PreToolUse(Edit|Write)  -> injects the note for a file before you edit it (Guard)");
-  console.log("  Stop                    -> auto-captures notes from the session (Capture; needs an LLM)");
   console.log("\nrestart Claude Code in this repo for the hooks to take effect.");
-  console.log("run 'lore setup' to enable auto-capture; see the index with 'lore index'.");
+  console.log("see what the agent gets with: lore index");
 }
 
 /** Idempotently add lore's hooks to .claude/settings.json. */
@@ -110,7 +109,6 @@ function wireHooks(cwd: string): void {
       console.warn("! Add these hooks manually:");
       console.warn(`!   SessionStart            -> "${ORIENT_COMMAND}"`);
       console.warn(`!   PreToolUse "Edit|Write" -> "${GUARD_COMMAND}"`);
-      console.warn(`!   Stop                    -> "${CAPTURE_COMMAND}"`);
       return;
     }
   }
@@ -121,7 +119,6 @@ function wireHooks(cwd: string): void {
     matcher: "Edit|Write",
     hooks: [{ type: "command", command: GUARD_COMMAND }],
   });
-  addHook(settings.hooks, "Stop", { hooks: [{ type: "command", command: CAPTURE_COMMAND }] });
 
   writeFileSync(file, `${JSON.stringify(settings, null, 2)}\n`);
 }

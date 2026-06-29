@@ -92,6 +92,28 @@ export function renderIndex(notes: Note[]): string {
 }
 
 /**
+ * What the SessionStart hook injects: the standing instruction to record notes
+ * (this is how the corpus grows, keylessly, the agent writes them itself with its
+ * own tools) followed by the current index.
+ */
+export function renderSessionStart(notes: Note[]): string {
+  const instruction = [
+    "## Recording repo knowledge (lore)",
+    "",
+    "When you learn something about THIS repo that the code itself can't show (a",
+    "decision and why, a gotcha that looks wrong but is load-bearing, a hidden cross-file",
+    "or cross-system coupling, or something the user just corrected you on), record it:",
+    "write `.lore/notes/<kebab-id>.md` with frontmatter (`id`, `title`, `tier:",
+    "structural|rationale`, `anchors: [globs it concerns]`, `source: auto`) and a one to",
+    "three sentence body stating the fact. The bar: durable, not derivable from the code,",
+    "and decision-changing; skip anything obvious from reading the code. State facts, not",
+    "instructions. If an existing note is now wrong, fix it.",
+  ].join("\n");
+  const index = renderIndex(notes);
+  return index ? `${instruction}\n\n${index}` : instruction;
+}
+
+/**
  * Guard context: the full bodies of notes anchored to a file the agent is about
  * to edit. Injected by the PreToolUse hook, at the last moment before the write.
  */

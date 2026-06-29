@@ -21,9 +21,9 @@ npm run build
 ## Ground rules
 
 - Keep changes small and focused.
-- The core (orient/guard) must stay dependency-light and **keyless**, anything
-  that needs an LLM goes behind the provider-agnostic layer in `src/llm.ts`.
+- lore is **keyless and makes no network calls.** Keep it that way: the agent in
+  the session is the intelligence.
 - A note's value is non-derivable, decision-changing, durable knowledge; keep the
-  capture/check logic honest to that bar.
+  recording instruction and check honest to that bar.
 
 Open an issue first for anything large.
