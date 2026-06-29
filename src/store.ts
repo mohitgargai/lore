@@ -76,13 +76,13 @@ export function matchedFiles(note: Note, files: string[]): string[] {
 export function renderIndex(notes: Note[]): string {
   if (notes.length === 0) return "";
   const lines = notes.map((n) => {
-    const where = n.anchors.length ? `, \`${n.anchors.join("`, `")}\`` : "";
+    const where = n.anchors.length ? ` (\`${n.anchors.join("`, `")}\`)` : "";
     return `- **${n.title}**${where}`;
   });
   return [
     "## Repo knowledge (lore)",
     "",
-    "Tacit context the code can't show, decisions, gotchas, invariants from past sessions.",
+    "Tacit context the code can't show: decisions, gotchas, invariants from past sessions.",
     "Treat these as hints, not gospel; verify against the current code.",
     "",
     ...lines,
