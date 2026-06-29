@@ -10,6 +10,7 @@
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { complete } from "./llm";
 
 export interface EvalCase {
   id: string;
@@ -48,28 +49,6 @@ export function loadCases(path?: string): EvalCase[] {
     .map((l) => JSON.parse(l) as EvalCase);
 }
 
-async function chat(prompt: string): Promise<string> {
-  const base = process.env.LORE_LLM_BASE_URL;
-  const model = process.env.LORE_LLM_MODEL;
-  const key = process.env.LORE_LLM_API_KEY ?? process.env.OPENAI_API_KEY ?? "";
-  if (!base || !model) {
-    throw new Error(
-      "Set an OpenAI-compatible endpoint (bring your own provider/key):\n" +
-        "  LORE_LLM_BASE_URL  e.g. https://api.openai.com/v1  |  http://localhost:11434/v1 (Ollama)\n" +
-        "  LORE_LLM_MODEL     e.g. gpt-4o-mini  |  a local model\n" +
-        "  LORE_LLM_API_KEY   or OPENAI_API_KEY; omit for local",
-    );
-  }
-  const res = await fetch(`${base.replace(/\/+$/, "")}/chat/completions`, {
-    method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model, temperature: 0, messages: [{ role: "user", content: prompt }] }),
-  });
-  if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);
-  const j = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  return j.choices?.[0]?.message?.content ?? "";
-}
-
 const pct = (x: number) => `${x >= 0 ? "+" : ""}${Math.round(x * 100)}%`;
 
 export async function runEval(args: string[]): Promise<void> {
@@ -86,8 +65,8 @@ export async function runEval(args: string[]): Promise<void> {
     let ctrl = 0;
     let treat = 0;
     for (let i = 0; i < runs; i++) {
-      if (scores(await chat(controlPrompt(c)), c.correct)) ctrl++;
-      if (scores(await chat(treatmentPrompt(c)), c.correct)) treat++;
+      if (scores(await complete(controlPrompt(c)), c.correct)) ctrl++;
+      if (scores(await complete(treatmentPrompt(c)), c.correct)) treat++;
     }
     const lift = (treat - ctrl) / runs;
     liftSum += lift;

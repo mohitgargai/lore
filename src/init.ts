@@ -4,6 +4,7 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { LORE_GITIGNORE } from "./store";
 
 const ORIENT_COMMAND = "lore hook session-start";
 const GUARD_COMMAND = "lore hook pre-tool-use";
@@ -67,6 +68,9 @@ export function runInit(cwd: string): void {
 
   const notesDir = join(cwd, ".lore", "notes");
   mkdirSync(notesDir, { recursive: true });
+
+  const gi = join(cwd, ".lore", ".gitignore");
+  if (!existsSync(gi)) writeFileSync(gi, LORE_GITIGNORE);
 
   const sample = join(notesDir, "example-delete-me.md");
   if (!existsSync(sample)) writeFileSync(sample, SAMPLE_NOTE(today));

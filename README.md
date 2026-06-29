@@ -10,15 +10,15 @@ without it.
 lore keeps that knowledge as markdown in the repo and hands it to the agent when
 it's relevant.
 
-Two things happen automatically. At the start of a Claude Code session it injects
-a short index of what's been written down, so the agent knows where the landmines
-are before it touches anything. And right before the agent edits a file, it
-injects the full note for that file, at the last moment where it can still
-prevent a wrong change. Neither relies on the agent deciding to look something up.
+Two things happen automatically, with no API key: at session start it injects a
+short index of what's written down (Orient), and right before an edit it injects
+the full note for that file (Guard) — the last moment to prevent a wrong change.
+Neither relies on the agent choosing to look something up.
 
-One more trigger is planned but not built: flagging a note when the code under it
-changes, so the knowledge doesn't quietly rot. I'd rather ship what's useful and
-live with it before adding that.
+Two optional commands keep the corpus alive and honest (these call an LLM — bring
+your own key): `lore capture` proposes notes from a diff so writing them isn't
+manual willpower, and `lore check` flags a note when the code under it changed,
+so the knowledge doesn't quietly rot.
 
 ## Install
 
@@ -81,6 +81,39 @@ Two Claude Code hooks, both feeding the model through `additionalContext`:
   adds context; it doesn't block the edit.
 
 Plain files, no database. Anchor matching is glob-based (`micromatch`).
+
+## Capture and check (optional, bring your own LLM)
+
+The core above needs no API key. These two do — point them at any
+OpenAI-compatible endpoint, including a local model:
+
+```bash
+export LORE_LLM_BASE_URL=https://api.openai.com/v1   # or http://localhost:11434/v1 (Ollama)
+export LORE_LLM_MODEL=gpt-4o-mini                    # or a local model
+export LORE_LLM_API_KEY=...                          # or OPENAI_API_KEY; omit for local
+```
+
+- `lore capture [range]` — reads a git diff (default uncommitted), proposes only
+  durable, non-derivable notes (the gate) into `.lore/proposed/`. Review them,
+  then `lore accept [id]` moves drafts into `notes/`. Nothing is written to your
+  knowledge without you accepting it.
+- `lore check [base]` — finds notes anchored to changed files and asks the model
+  whether the change makes each claim false. Prints a verdict per note and exits
+  non-zero if any look stale, so it can gate a PR.
+
+Auto-capture at session end is opt-in (it costs an LLM call per session). Add a
+Stop hook if you want it:
+
+```json
+{ "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "lore hook stop" } ] } ] } }
+```
+
+Staleness in CI — run `lore check` against the PR base:
+
+```yaml
+- run: npx lore check origin/${{ github.base_ref }}
+  env: { LORE_LLM_BASE_URL: ..., LORE_LLM_MODEL: ..., LORE_LLM_API_KEY: ${{ secrets.LLM_KEY }} }
+```
 
 ## Does it actually work?
 

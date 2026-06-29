@@ -21,6 +21,9 @@ export interface Note {
 export const LORE_DIR = ".lore";
 export const NOTES_DIR = join(LORE_DIR, "notes");
 
+/** Local-only artifacts kept out of git (telemetry + unreviewed drafts). */
+export const LORE_GITIGNORE = "recall-log.jsonl\nproposed/\n";
+
 /** Parse one note from its raw file contents. Pure — easy to test. */
 export function parseNoteContent(raw: string, fallbackId: string): Note | null {
   const { data, content } = matter(raw);
@@ -55,6 +58,13 @@ export function notesForFile(notes: Note[], file: string, cwd: string = process.
   const rel = file.startsWith(cwd) ? file.slice(cwd.length).replace(/^\/+/, "") : file;
   return notes.filter((n) =>
     n.anchors.some((a) => !a.startsWith("symbol:") && (mm.isMatch(rel, a) || mm.isMatch(basename(rel), a))),
+  );
+}
+
+/** Of `files`, the subset matched by this note's glob anchors (symbols ignored). */
+export function matchedFiles(note: Note, files: string[]): string[] {
+  return files.filter((f) =>
+    note.anchors.some((a) => !a.startsWith("symbol:") && (mm.isMatch(f, a) || mm.isMatch(basename(f), a))),
   );
 }
 

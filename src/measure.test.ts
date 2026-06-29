@@ -1,6 +1,12 @@
+import { mkdtempSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { runAccept } from "./capture";
 import { loadCases, scores } from "./eval";
+import { extractJson } from "./llm";
 import { summarizeLog, type LogEvent } from "./log";
+import { matchedFiles, parseNoteContent } from "./store";
 
 describe("eval scoring", () => {
   it("passes when all includes present and no excludes present", () => {
@@ -24,6 +30,40 @@ describe("packaged eval cases", () => {
       expect(c.note).toBeTruthy();
       expect(c.correct).toBeTruthy();
     }
+  });
+});
+
+describe("extractJson", () => {
+  it("pulls a fenced JSON array out of prose", () => {
+    const out = extractJson<unknown[]>('Here you go:\n```json\n[{"id":"x"}]\n```\ndone');
+    expect(out).toEqual([{ id: "x" }]);
+  });
+  it("pulls a bare object", () => {
+    expect(extractJson<{ verdict: string }>('{"verdict":"stale","reason":"r"}').verdict).toBe("stale");
+  });
+  it("throws when there is no JSON", () => {
+    expect(() => extractJson("no json here")).toThrow();
+  });
+});
+
+describe("matchedFiles", () => {
+  const note = parseNoteContent(`---\nid: n\nanchors: ["src/export/**", "models/asset.py"]\n---\nbody`, "n")!;
+  it("returns the subset of changed files an anchor matches", () => {
+    const changed = ["src/export/routes.ts", "src/auth/login.ts", "models/asset.py"];
+    expect(matchedFiles(note, changed).sort()).toEqual(["models/asset.py", "src/export/routes.ts"]);
+  });
+  it("returns empty when nothing matches", () => {
+    expect(matchedFiles(note, ["src/auth/login.ts"])).toEqual([]);
+  });
+});
+
+describe("accept", () => {
+  it("moves a proposed draft into notes/", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "lore-"));
+    mkdirSync(join(cwd, ".lore", "proposed"), { recursive: true });
+    writeFileSync(join(cwd, ".lore", "proposed", "d.md"), "---\nid: d\n---\nbody");
+    runAccept(["d"], cwd);
+    expect(readdirSync(join(cwd, ".lore", "notes"))).toContain("d.md");
   });
 });
 

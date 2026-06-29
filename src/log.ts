@@ -7,7 +7,7 @@
  */
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { LORE_DIR } from "./store";
+import { LORE_DIR, LORE_GITIGNORE } from "./store";
 
 const LOG_NAME = "recall-log.jsonl";
 
@@ -33,7 +33,7 @@ export function logEvent(ev: Omit<LogEvent, "ts">, cwd: string = process.cwd()):
 function ensureGitignored(dir: string): void {
   const gi = join(dir, ".gitignore");
   try {
-    if (!existsSync(gi)) writeFileSync(gi, LOG_NAME + "\n");
+    if (!existsSync(gi)) writeFileSync(gi, LORE_GITIGNORE);
   } catch {
     /* ignore */
   }
