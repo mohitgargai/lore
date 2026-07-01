@@ -1,6 +1,6 @@
 {
   "name": "@mohitgargai/lore",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "In-repo, agent-native tacit knowledge for coding agents: facts the code can't show, surfaced to Claude Code at session start and right before edits.",
   "keywords": [
     "claude-code",
