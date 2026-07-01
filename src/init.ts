@@ -11,6 +11,7 @@ const GUARD_COMMAND = "lore hook pre-tool-use";
 
 const SAMPLE_NOTE = (today: string) => `---
 id: example-delete-me
+title: An example lore note (delete me)
 tier: rationale
 anchors: ["src/example/**"]
 confidence: low
@@ -48,15 +49,20 @@ act on it:
 ## Note format
 \`\`\`markdown
 ---
-id: short-kebab-id
+id: short-kebab-id               # stable id (defaults to the filename)
+title: one-line summary          # what shows in the index (defaults to first body line)
 tier: structural | rationale     # structural = checkable; rationale = the "why"
 anchors: ["src/area/**", "symbol:functionName"]
-confidence: high | medium | low
-created: YYYY-MM-DD
-source: auto | seed | hand
+confidence: high | medium | low  # optional
+source: auto | seed | hand       # optional: who wrote it
+created: YYYY-MM-DD               # optional
 ---
 One idea, stated plainly. Anchor it to every file it touches.
 \`\`\`
+
+Only \`id\`, \`title\`, \`tier\`, and \`anchors\` are read by lore; the rest is
+provenance for humans and future agents. \`id\` and \`title\` both have sensible
+fallbacks, so the minimum viable note is \`tier\` + \`anchors\` + a body.
 
 ## How it reaches the agent
 Two Claude Code hooks, wired by \`lore init\` (no API key, no network calls):

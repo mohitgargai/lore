@@ -49,7 +49,12 @@ on its own. You can also write notes by hand: drop a markdown file in
 lore recall src/foo.ts   # the full notes anchored to a file
 lore list                # note ids + anchors
 lore check [base]        # flag notes whose code changed, so they get re-read
+lore log                 # how often notes actually fired (see "Does it work?")
 ```
+
+lore dogfoods itself: this repo has a `.lore/` with notes on its own non-obvious
+design (why hooks fail open, why Guard never blocks). Run `lore index` here to see
+them.
 
 ## What's worth a note
 
@@ -66,6 +71,7 @@ that reads it by name"), not "always do X."
 ```markdown
 ---
 id: export-rate-limit
+title: Export rate limiting lives at enqueue, not the request handler
 tier: rationale
 anchors: ["src/export/**"]
 ---
